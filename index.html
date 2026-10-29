@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Mesa de Ayuda - Help Desk ITIL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para scrollbars y animaciones */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .badge-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    <!-- Header Corporativo -->
+    <header class="bg-slate-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Sistema de Mesa de Ayuda</h1>
+                        <p class="text-slate-400 text-sm">Help Desk ITIL v4 - Gestión de Servicios TI</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-slate-400">Fecha del Sistema</p>
+                    <p id="systemDate" class="font-semibold"></p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal - Dos Columnas -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- COLUMNA IZQUIERDA: Formulario de Creación de Tickets -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center space-x-2 mb-6 pb-4 border-b border-slate-200">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <h2 class="text-xl font-bold text-slate-800">Crear Nuevo Ticket</h2>
+                    </div>
+
+                    <form id="ticketForm" class="space-y-6">
+                        <!-- Sección A: Datos del Solicitante -->
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm mr-2">A</span>
+                                Datos del Solicitante
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
+                                    <input type="text" id="nombre" required maxlength="100" 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                        placeholder="Ej: Juan Pérez García">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Correo Corporativo <span class="text-red-500">*</span></label>
+                                    <input type="email" id="correo" required 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                        placeholder="Ej: juan.perez@empresa.com">
+                                    <p id="correoError" class="text-red-500 text-xs mt-1 hidden">Debe usar correo corporativo (@empresa.com)</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Departamento <span class="text-red-500">*</span></label>
+                                    <select id="departamento" required 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        <option value="TI">TI (Tecnología de la Información)</option>
+                                        <option value="Operaciones">Operaciones</option>
+                                        <option value="Finanzas">Finanzas</option>
+                                        <option value="RRHH">Recursos Humanos (RRHH)</option>
+                                        <option value="Ventas">Ventas</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección B: Clasificación Técnica ITIL -->
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm mr-2">B</span>
+                                Clasificación Técnica (ITIL)
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Ticket <span class="text-red-500">*</span></label>
+                                    <select id="tipoTicket" required 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                        onchange="togglePasosReproducir()">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Incidente">Incidente (Fallo en el servicio)</option>
+                                        <option value="Requerimiento">Requerimiento de Servicio (Petición de algo nuevo)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Categoría del CI / Elemento de Configuración <span class="text-red-500">*</span></label>
+                                    <select id="categoria" required 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Hardware">Hardware (Equipos, Dispositivos)</option>
+                                        <option value="Software">Software (Aplicaciones, Programas)</option>
+                                        <option value="Redes">Redes/Conectividad (Internet, VPN, Wi-Fi)</option>
+                                        <option value="Seguridad">Accesos/Seguridad (Usuarios, Permisos)</option>
+                                        <option value="Telefonia">Telefonía (Extensiones, VoIP)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección C: Matriz de Prioridad Automática -->
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm mr-2">C</span>
+                                Matriz de Prioridad (Cálculo Automático)
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Impacto <span class="text-red-500">*</span></label>
+                                    <select id="impacto" required 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                        onchange="calcularPrioridad()">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Alto">Alto (Afecta a toda la empresa)</option>
+                                        <option value="Medio">Medio (Afecta a un departamento)</option>
+                                        <option value="Bajo">Bajo (Afecta a un usuario)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Urgencia <span class="text-red-500">*</span></label>
+                                    <select id="urgencia" required 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                        onchange="calcularPrioridad()">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Alta">Alta (Operación detenida)</option>
+                                        <option value="Media">Media (Degradación del servicio)</option>
+                                        <option value="Baja">Baja (Trabajo con alternativa)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Badge de Prioridad Calculada -->
+                            <div class="mt-4 p-3 bg-white rounded-lg border border-slate-200">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">Prioridad Calculada:</label>
+                                <div id="prioridadBadge" class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-slate-200 text-slate-500">
+                                    Seleccione Impacto y Urgencia
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección D: Detalle Técnico -->
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-slate-700 mb-4 flex items-center">
+                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm mr-2">D</span>
+                                Detalle Técnico
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Asunto / Título Corto <span class="text-red-500">*</span></label>
+                                    <input type="text" id="asunto" required maxlength="80" 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                        placeholder="Máx 80 caracteres">
+                                    <p class="text-xs text-slate-500 mt-1"><span id="charCount">0</span>/80 caracteres</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Descripción Detallada <span class="text-red-500">*</span></label>
+                                    <textarea id="descripcion" required rows="4" 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+                                        placeholder="Describa detalladamente el problema o solicitud..."></textarea>
+                                </div>
+                                <div id="pasosReproducirContainer" class="hidden">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Pasos para Reproducir <span class="text-red-500">*</span> (Solo Incidentes)</label>
+                                    <textarea id="pasosReproducir" rows="3" 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+                                        placeholder="Describa los pasos exactos para reproducir el incidente..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Adjunto Simulado (Imágenes o .log)</label>
+                                    <input type="file" id="adjunto" accept="image/*,.log" 
+                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    <p class="text-xs text-slate-500 mt-1">Formatos aceptados: Imágenes (.png, .jpg, .jpeg) y archivos .log</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Envío -->
+                        <button type="submit" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span>Crear Ticket</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: Panel de Gestión de Tickets -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md p-6 h-full">
+                    <div class="flex items-center space-x-2 mb-6 pb-4 border-b border-slate-200">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <h2 class="text-xl font-bold text-slate-800">Gestión de Tickets</h2>
+                    </div>
+
+                    <!-- Contadores de Métricas (KPIs) -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-600">
+                            <p class="text-sm text-slate-600">Total Tickets</p>
+                            <p id="kpiTotal" class="text-2xl font-bold text-slate-800">0</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-yellow-500">
+                            <p class="text-sm text-slate-600">Abiertos</p>
+                            <p id="kpiAbiertos" class="text-2xl font-bold text-slate-800">0</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400">
+                            <p class="text-sm text-slate-600">En Progreso</p>
+                            <p id="kpiEnProgreso" class="text-2xl font-bold text-slate-800">0</p>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-red-600">
+                            <p class="text-sm text-slate-600">Críticos/Altos</p>
+                            <p id="kpiCriticos" class="text-2xl font-bold text-slate-800">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Búsqueda -->
+                    <div class="mb-4">
+                        <div class="relative">
+                            <input type="text" id="buscador" 
+                                class="w-full px-4 py-2 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                placeholder="Buscar por ID, Asunto o Solicitante..."
+                                oninput="filtrarTickets()">
+                            <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Filtros por Estado -->
+                    <div class="flex space-x-2 mb-4 overflow-x-auto pb-2">
+                        <button onclick="setFiltroEstado('Todos')" 
+                            class="filtro-estado px-4 py-2 rounded-lg text-sm font-medium transition bg-blue-600 text-white" data-filtro="Todos">
+                            Todos
+                        </button>
+                        <button onclick="setFiltroEstado('Abierto')" 
+                            class="filtro-estado px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-200 text-slate-700 hover:bg-slate-300" data-filtro="Abierto">
+                            Abiertos
+                        </button>
+                        <button onclick="setFiltroEstado('En Progreso')" 
+                            class="filtro-estado px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-200 text-slate-700 hover:bg-slate-300" data-filtro="En Progreso">
+                            En Progreso
+                        </button>
+                        <button onclick="setFiltroEstado('Resuelto')" 
+                            class="filtro-estado px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-200 text-slate-700 hover:bg-slate-300" data-filtro="Resuelto">
+                            Resueltos
+                        </button>
+                    </div>
+
+                    <!-- Lista de Tickets -->
+                    <div id="ticketsContainer" class="space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
+                        <!-- Los tickets se renderizarán aquí dinámicamente -->
+                        <div id="noTickets" class="text-center py-12 text-slate-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            <p class="text-lg font-medium">No hay tickets creados</p>
+                            <p class="text-sm">Complete el formulario para crear el primer ticket</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-400 py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>Sistema de Mesa de Ayuda - Help Desk ITIL v4 | Conforme a ISO 20000</p>
+            <p class="text-xs mt-1">Desarrollado para Gestión de Servicios TI Corporativos</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript - Lógica de Negocio -->
+    <script>
+        // Configuración de la API
+        const API_BASE_URL = window.location.origin;
+        
+        // Estado global de la aplicación
+        let tickets = [];
+        let filtroEstadoActual = 'Todos';
+        let contadorIncidentes = 0;
+        let contadorRequerimientos = 0;
+
+        // Inicialización al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar fecha del sistema
+            actualizarFechaSistema();
+            
+            // Cargar tickets desde el backend
+            cargarTicketsDesdeAPI();
+            
+            // Configurar contador de caracteres
+            document.getElementById('asunto').addEventListener('input', function() {
+                document.getElementById('charCount').textContent = this.value.length;
+            });
+            
+            // Validación de correo en tiempo real
+            document.getElementById('correo').addEventListener('blur', validarCorreo);
+        });
+
+        // Actualizar fecha del sistema
+        function actualizarFechaSistema() {
+            const ahora = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('systemDate').textContent = ahora.toLocaleDateString('es-ES', opciones);
+        }
+
+        // Validar correo corporativo
+        function validarCorreo() {
+            const correo = document.getElementById('correo').value;
+            const errorDiv = document.getElementById('correoError');
+            
+            // Validación genérica de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (correo && !emailRegex.test(correo)) {
+                errorDiv.classList.remove('hidden');
+                return false;
+            }
+            
+            errorDiv.classList.add('hidden');
+            return true;
+        }
+
+        // Mostrar/Ocultar campo de pasos para reproducir (solo para incidentes)
+        function togglePasosReproducir() {
+            const tipoTicket = document.getElementById('tipoTicket').value;
+            const pasosContainer = document.getElementById('pasosReproducirContainer');
+            const pasosTextarea = document.getElementById('pasosReproducir');
+            
+            if (tipoTicket === 'Incidente') {
+                pasosContainer.classList.remove('hidden');
+                pasosTextarea.required = true;
+            } else {
+                pasosContainer.classList.add('hidden');
+                pasosTextarea.required = false;
+                pasosTextarea.value = '';
+            }
+        }
+
+        // Calcular prioridad automáticamente según matriz ITIL
+        function calcularPrioridad() {
+            const impacto = document.getElementById('impacto').value;
+            const urgencia = document.getElementById('urgencia').value;
+            const badge = document.getElementById('prioridadBadge');
+            
+            if (!impacto || !urgencia) {
+                badge.className = 'inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-slate-200 text-slate-500';
+                badge.textContent = 'Seleccione Impacto y Urgencia';
+                return null;
+            }
+            
+            let prioridad = '';
+            let badgeClass = '';
+            
+            // Matriz de Prioridad ITIL
+            if (impacto === 'Alto' && urgencia === 'Alta') {
+                prioridad = 'CRÍTICA';
+                badgeClass = 'bg-red-600 text-white badge-pulse';
+            } else if ((impacto === 'Alto' && urgencia === 'Media') || (impacto === 'Medio' && urgencia === 'Alta')) {
+                prioridad = 'ALTA';
+                badgeClass = 'bg-orange-500 text-white';
+            } else if ((impacto === 'Bajo' && urgencia === 'Alta') || (impacto === 'Medio' && urgencia === 'Media')) {
+                prioridad = 'MEDIA';
+                badgeClass = 'bg-yellow-500 text-white';
+            } else {
+                prioridad = 'BAJA';
+                badgeClass = 'bg-blue-500 text-white';
+            }
+            
+            badge.className = `inline-flex items-center px-4 py-2 rounded-full text-sm font-bold ${badgeClass}`;
+            badge.textContent = prioridad;
+            
+            return prioridad;
+        }
+
+        // Generar ID único según tipo de ticket (basado en contadores del backend)
+        async function generarID(tipoTicket) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/contadores`);
+                const data = await response.json();
+                
+                const año = new Date().getFullYear();
+                let prefijo = '';
+                let numero = '';
+                
+                if (tipoTicket === 'Incidente') {
+                    prefijo = 'INC';
+                    numero = String(data.contadorIncidentes + 1).padStart(4, '0');
+                } else {
+                    prefijo = 'REQ';
+                    numero = String(data.contadorRequerimientos + 1).padStart(4, '0');
+                }
+                
+                return `${prefijo}-${año}-${numero}`;
+            } catch (error) {
+                console.error('Error al generar ID:', error);
+                // Fallback: usar timestamp como fallback
+                const año = new Date().getFullYear();
+                const prefijo = tipoTicket === 'Incidente' ? 'INC' : 'REQ';
+                const numero = String(Date.now()).slice(-4);
+                return `${prefijo}-${año}-${numero}`;
+            }
+        }
+
+        // Procesar envío del formulario
+        document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validar correo
+            if (!validarCorreo()) {
+                alert('Por favor, ingrese un correo electrónico válido');
+                return;
+            }
+            
+            // Obtener valores del formulario
+            const tipoTicket = document.getElementById('tipoTicket').value;
+            const prioridad = calcularPrioridad();
+            
+            if (!prioridad) {
+                alert('Por favor, seleccione el Impacto y la Urgencia para calcular la Prioridad');
+                return;
+            }
+            
+            // Generar ID único
+            const ticketId = await generarID(tipoTicket);
+            
+            // Crear objeto de ticket
+            const ticket = {
+                id: ticketId,
+                tipo: tipoTicket,
+                solicitante: {
+                    nombre: document.getElementById('nombre').value,
+                    correo: document.getElementById('correo').value,
+                    departamento: document.getElementById('departamento').value
+                },
+                clasificacion: {
+                    categoria: document.getElementById('categoria').value
+                },
+                prioridad: {
+                    impacto: document.getElementById('impacto').value,
+                    urgencia: document.getElementById('urgencia').value,
+                    calculada: prioridad
+                },
+                detalle: {
+                    asunto: document.getElementById('asunto').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    pasosReproducir: document.getElementById('pasosReproducir').value || null,
+                    adjunto: document.getElementById('adjunto').files[0] ? document.getElementById('adjunto').files[0].name : null
+                },
+                estado: 'Abierto',
+                fechaCreacion: new Date().toISOString(),
+                fechaActualizacion: new Date().toISOString()
+            };
+            
+            try {
+                // Enviar ticket al backend
+                const response = await fetch(`${API_BASE_URL}/api/tickets`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(ticket)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al crear el ticket en el servidor');
+                }
+                
+                // Recargar tickets desde el backend
+                await cargarTicketsDesdeAPI();
+                
+                // Limpiar formulario
+                limpiarFormulario();
+                
+                // Mostrar confirmación
+                alert(`Ticket ${ticket.id} creado exitosamente con prioridad ${prioridad}`);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al crear el ticket. Por favor, intente nuevamente.');
+            }
+        });
+
+        // Limpiar formulario
+        function limpiarFormulario() {
+            document.getElementById('ticketForm').reset();
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('prioridadBadge').className = 'inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-slate-200 text-slate-500';
+            document.getElementById('prioridadBadge').textContent = 'Seleccione Impacto y Urgencia';
+            document.getElementById('pasosReproducirContainer').classList.add('hidden');
+            document.getElementById('correoError').classList.add('hidden');
+        }
+
+        // Cargar tickets desde la API del backend
+        async function cargarTicketsDesdeAPI() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/tickets`);
+                if (!response.ok) {
+                    throw new Error('Error al cargar tickets del servidor');
+                }
+                
+                tickets = await response.json();
+                
+                // Actualizar contadores y renderizar
+                actualizarKPIs();
+                renderizarTickets();
+            } catch (error) {
+                console.error('Error al cargar tickets:', error);
+                // No mostrar alerta en recargas automáticas para no molestar al usuario
+            }
+        }
+
+        // Refrescar tickets automáticamente cada 30 segundos para tiempo real
+        setInterval(() => {
+            cargarTicketsDesdeAPI();
+        }, 30000);
+
+        // Actualizar KPIs
+        function actualizarKPIs() {
+            const total = tickets.length;
+            const abiertos = tickets.filter(t => t.estado === 'Abierto').length;
+            const enProgreso = tickets.filter(t => t.estado === 'En Progreso').length;
+            const criticos = tickets.filter(t => t.prioridad.calculada === 'CRÍTICA' || t.prioridad.calculada === 'ALTA').length;
+            
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiAbiertos').textContent = abiertos;
+            document.getElementById('kpiEnProgreso').textContent = enProgreso;
+            document.getElementById('kpiCriticos').textContent = criticos;
+        }
+
+        // Filtro por estado
+        function setFiltroEstado(estado) {
+            filtroEstadoActual = estado;
+            
+            // Actualizar estilos de botones
+            document.querySelectorAll('.filtro-estado').forEach(btn => {
+                if (btn.dataset.filtro === estado) {
+                    btn.className = 'filtro-estado px-4 py-2 rounded-lg text-sm font-medium transition bg-blue-600 text-white';
+                } else {
+                    btn.className = 'filtro-estado px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-200 text-slate-700 hover:bg-slate-300';
+                }
+            });
+            
+            renderizarTickets();
+        }
+
+        // Filtrar tickets por búsqueda
+        function filtrarTickets() {
+            renderizarTickets();
+        }
+
+        // Renderizar tickets
+        function renderizarTickets() {
+            const container = document.getElementById('ticketsContainer');
+            const noTickets = document.getElementById('noTickets');
+            const busqueda = document.getElementById('buscador').value.toLowerCase();
+            
+            // Filtrar tickets
+            let ticketsFiltrados = tickets.filter(ticket => {
+                // Filtro por estado
+                if (filtroEstadoActual !== 'Todos' && ticket.estado !== filtroEstadoActual) {
+                    return false;
+                }
+                
+                // Filtro por búsqueda
+                if (busqueda) {
+                    const buscaEn = `${ticket.id} ${ticket.detalle.asunto} ${ticket.solicitante.nombre}`.toLowerCase();
+                    if (!buscaEn.includes(busqueda)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // Mostrar mensaje si no hay tickets
+            if (ticketsFiltrados.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(noTickets);
+                noTickets.classList.remove('hidden');
+                return;
+            }
+            
+            noTickets.classList.add('hidden');
+            
+            // Renderizar cada ticket
+            container.innerHTML = ticketsFiltrados.map(ticket => crearTarjetaTicket(ticket)).join('');
+        }
+
+        // Crear HTML de tarjeta de ticket
+        function crearTarjetaTicket(ticket) {
+            const fechaCreacion = new Date(ticket.fechaCreacion).toLocaleString('es-ES');
+            
+            // Badge de prioridad
+            let prioridadClass = '';
+            switch (ticket.prioridad.calculada) {
+                case 'CRÍTICA':
+                    prioridadClass = 'bg-red-600 text-white badge-pulse';
+                    break;
+                case 'ALTA':
+                    prioridadClass = 'bg-orange-500 text-white';
+                    break;
+                case 'MEDIA':
+                    prioridadClass = 'bg-yellow-500 text-white';
+                    break;
+                case 'BAJA':
+                    prioridadClass = 'bg-blue-500 text-white';
+                    break;
+            }
+            
+            // Badge de estado
+            let estadoClass = '';
+            switch (ticket.estado) {
+                case 'Abierto':
+                    estadoClass = 'bg-slate-600 text-white';
+                    break;
+                case 'En Progreso':
+                    estadoClass = 'bg-blue-500 text-white';
+                    break;
+                case 'Resuelto':
+                    estadoClass = 'bg-green-600 text-white';
+                    break;
+            }
+            
+            // Badge de tipo
+            const tipoClass = ticket.tipo === 'Incidente' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+            
+            return `
+                <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 hover:shadow-md transition fade-in">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">${ticket.id}</h3>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="px-2 py-1 rounded text-xs font-medium ${tipoClass}">${ticket.tipo}</span>
+                                <span class="px-2 py-1 rounded text-xs font-medium ${prioridadClass}">${ticket.prioridad.calculada}</span>
+                                <span class="px-2 py-1 rounded text-xs font-medium ${estadoClass}">${ticket.estado}</span>
+                            </div>
+                        </div>
+                        <span class="text-xs text-slate-500">${fechaCreacion}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-medium text-slate-700">${ticket.detalle.asunto}</p>
+                        <p class="text-sm text-slate-600 mt-1">Solicitante: ${ticket.solicitante.nombre} (${ticket.solicitante.departamento})</p>
+                        <p class="text-sm text-slate-500">Categoría: ${ticket.clasificacion.categoria}</p>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="cambiarEstado('${ticket.id}')" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded transition flex items-center justify-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            <span>Cambiar Estado</span>
+                        </button>
+                        <button onclick="exportarJSON('${ticket.id}')" 
+                            class="flex-1 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium py-2 px-3 rounded transition flex items-center justify-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            <span>Exportar JSON</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Cambiar estado del ticket (ciclo de vida)
+        async function cambiarEstado(ticketId) {
+            const ticket = tickets.find(t => t.id === ticketId);
+            
+            if (!ticket) return;
+            
+            // Ciclo de vida: Abierto -> En Progreso -> Resuelto -> Abierto
+            let nuevoEstado = '';
+            switch (ticket.estado) {
+                case 'Abierto':
+                    nuevoEstado = 'En Progreso';
+                    break;
+                case 'En Progreso':
+                    nuevoEstado = 'Resuelto';
+                    break;
+                case 'Resuelto':
+                    nuevoEstado = 'Abierto';
+                    break;
+            }
+            
+            try {
+                // Actualizar estado en el backend
+                const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al actualizar el ticket en el servidor');
+                }
+                
+                // Recargar tickets desde el backend
+                await cargarTicketsDesdeAPI();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar el ticket. Por favor, intente nuevamente.');
+            }
+        }
+
+        // Exportar ticket a JSON
+        async function exportarJSON(ticketId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`);
+                if (!response.ok) {
+                    throw new Error('Error al obtener el ticket del servidor');
+                }
+                
+                const ticket = await response.json();
+                
+                // Crear JSON con formato técnico
+                const jsonContent = JSON.stringify(ticket, null, 2);
+                
+                // Crear Blob y descargar
+                const blob = new Blob([jsonContent], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${ticketId}_export.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al exportar el ticket. Por favor, intente nuevamente.');
+            }
+        }
+    </script>
+</body>
+</html>
