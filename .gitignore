@@ -2,7 +2,7 @@
 node_modules/
 package-lock.json
 
-# Base de datos SQLite
+# Base de datos
 *.db
 *.sqlite
 *.sqlite3

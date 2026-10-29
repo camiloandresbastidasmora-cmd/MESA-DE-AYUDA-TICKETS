@@ -1,18 +1,18 @@
 {
   "name": "helpdesk-itil",
   "version": "1.0.0",
-  "description": "Sistema de Mesa de Ayuda ITIL v4 con Backend Node.js/Express y SQLite",
+  "description": "Sistema de Mesa de Ayuda ITIL v4 con Backend Node.js/Express y PostgreSQL",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["helpdesk", "itil", "tickets", "express", "sqlite"],
+  "keywords": ["helpdesk", "itil", "tickets", "express", "postgresql"],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
+    "pg": "^8.11.3",
     "cors": "^2.8.5"
   }
 }
